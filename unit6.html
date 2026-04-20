@@ -1,0 +1,992 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Mfon Owoh</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">Mfon Owoh</a></h1>
+						<nav>
+							<a href="#menu">Menu</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menu</h2>
+							<ul class="links">
+								<li><a href="index.html">Home</a></li>
+								<li><a href="generic.html">Generic</a></li>
+								<li><a href="elements.html">Elements</a></li>
+								<!--<li><a href="#">Log In</a></li> -->
+								<!--<li><a href="#">Sign Up</a></li> -->
+							</ul>
+							<a href="#" class="close">Close</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>Unit 6: Concurrency and Parallelism in Object-Oriented Design</h2>
+								<p>In this unit we explored the critical topics of concurrency and parallelism in object-oriented design. As software systems become more complex,
+								the ability to handle multiple tasks simultaneously is essential for building efficient and responsive applications.</p>
+								
+								<b>Required reading:Nguyen Quan (2022) Advanced Python Programming. 2nd Edition. Packt Publishing.Chapter 6 Section 2 and Chapter 7. <br>
+									McDonald, J. C. (2023) Dead Simple Python: Idiomatic Python for the Impatient Programmer. 1st edition. New York: No Starch Press. Chapters 17 and 20.</b>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<section>
+										<h3 class="major">Objectives</h3>										
+										<p> <li>Provide an Introduction to Concurrency
+											<li>Cover the basics of threads, processes, and synchronisation, explaining how they enable concurrent execution in software systems.</li>
+											<li>Explore Object-Oriented Approaches to Writing Thread-Safe Code:</li>
+											<li>Explore how object-oriented principles can be applied to write thread-safe code, ensuring that your programs run correctly in a multi-threaded environment.</li>
+											<li>Discuss Common Concurrency Issues and Solutions:</li>
+											<li>Explore common concurrency problems such as race conditions and deadlocks, and how to solve them using synchronization techniques and best practices.</li>
+											<li>Engage in Practical Exercise involving writint a thread-safe code in Python, giving you hands-on experience with managing concurrency in an object-oriented context </li></p>
+										
+										<h4><p>Task</p>
+You are tasked with designing and implementing a thread-safe banking system that allows multiple users to perform transactions (e.g., deposit, withdraw, and check balance) concurrently. The system must ensure that all operations are thread-safe and avoid common concurrency issues such as race conditions and deadlocks.</h4>
+	  
+										<blockquote><p><b>Solution Steps</b>
+										<b>Bank Account Class:</b><br>
+										<li>Create a BankAccount class with the following attributes:</li>
+										<li>Account_number (unique identifier for the account).</li>
+										<li>Balance (current balance of the account).</li><br>
+										<b>Implement the following methods:</b>
+										<li>deposit(amount): Adds the specified amount to the balance.</li>
+										<li>withdraw(amount): Deducts the specified amount from the balance (if sufficient funds are available).</li>
+										<li>get_balance(): Returns the current balance.</li>
+										<b>Thread Safety:</b>
+										<li>Ensure that all methods in the BankAccount class are thread-safe. Use synchronisation mechanisms such as locks or semaphores to prevent race conditions.</li>
+										<b>Transaction Simulation:</b>
+										<li>Create a TransactionSimulator class that simulates multiple users performing transactions on the same bank account concurrently.</li>
+										<li>Each user should perform a series of deposits and withdrawals.</li>
+										<li>Use threads to simulate concurrent transactions.</li>
+										<b>Deadlock Prevention:</b>
+										<li>Ensure that your implementation avoids deadlocks. For example, if two users are trying to transfer money between accounts, the system should handle this without causing a deadlock.</li>
+										<b>Testing and Validation:</b>
+										<li>Write unit tests to validate that the system is thread-safe and handles concurrent transactions correctly.</li>
+										<li>Simulate scenarios where multiple users are performing transactions simultaneously and verify that the final balance is correct.</li>
+										
+										</p></blockquote>
+										<h4>Solution</h4>
+										<pre><code>
+										
+"""
+Created on Sun Mar  8 09:27:43 2026
+
+@author: mfonowoh
+"""
+
+import time
+import sys
+import threading
+import unittest
+from concurrent.futures import ThreadPoolExecutor
+from typing import List, Dict
+from enum import Enum
+
+
+DELAY = sys.getswitchinterval() + 0.01
+# Global barrier for deadlock testing
+transfer_barrier = None
+
+class TransactionType(Enum):
+    DEPOSIT = "DEPOSIT"
+    WITHDRAW = "WITHDRAW"
+    TRANSFER = "TRANSFER"
+
+
+class TransactionResult:
+    """Stores the result of a transaction"""
+    
+    def __init__(self, success: bool, transaction_type: TransactionType, 
+                 amount: float, error: str = None, account_id: int = None):
+        self.success = success
+        self.transaction_type = transaction_type
+        self.amount = amount
+        self.error = error
+        self.account_id = account_id
+        self.timestamp = time.time()
+    
+    def __repr__(self):
+        return f"TransactionResult({self.transaction_type.value}, ₦{self.amount}, Success: {self.success}, Error: {self.error})"
+
+
+class BankAccount:
+    """
+    A bank account that CAN experience deadlocks due to inconsistent lock ordering.
+    """
+
+    def __init__(self, account_number: int, balance: float = 0.0) -> None:
+        self.account_number = account_number
+        self._balance = balance
+        self._lock = threading.Lock()
+        self.transaction_history: List[TransactionResult] = []
+
+    def Deposit(self, amount: float) -> TransactionResult:
+        thread_id = threading.current_thread().name
+        print(f"[{thread_id}] DEPOSIT called for Account {self.account_number}")
+        
+        try:
+            if amount <= 0:
+                raise ValueError("Deposit amount must be positive")
+            
+            print(f"[{thread_id}] Attempting to acquire lock for Account {self.account_number}")
+            with self._lock:
+                print(f"[{thread_id}] Lock acquired for Account {self.account_number}")
+                print(f"[{thread_id}] Reading balance: ₦{self._balance}")
+                new_bal = self._balance + amount
+                time.sleep(DELAY)
+                self._balance = new_bal
+                print(f"[{thread_id}] Balance updated to: ₦{self._balance}")
+            
+            result = TransactionResult(True, TransactionType.DEPOSIT, amount, account_id=self.account_number)
+            self.transaction_history.append(result)
+            print(f"[{thread_id}] Lock released for Account {self.account_number}\n")
+            return result
+        
+        except Exception as e:
+            result = TransactionResult(False, TransactionType.DEPOSIT, amount, str(e), self.account_number)
+            self.transaction_history.append(result)
+            print(f"[{thread_id}] Error during deposit: {str(e)}\n")
+            return result
+
+    def Withdraw(self, amount: float) -> TransactionResult:
+        thread_id = threading.current_thread().name
+        print(f"[{thread_id}] WITHDRAW called for Account {self.account_number}")
+        
+        try:
+            if amount <= 0:
+                raise ValueError("Withdrawal amount must be positive")
+            
+            print(f"[{thread_id}] Attempting to acquire lock for Account {self.account_number}")
+            with self._lock:
+                print(f"[{thread_id}] Lock acquired for Account {self.account_number}")
+                print(f"[{thread_id}] Reading balance: ₦{self._balance}")
+                if self._balance < amount:
+                    print(f"[{thread_id}] Insufficient funds")
+                    raise ValueError("Insufficient funds")
+                new_bal = self._balance - amount
+                time.sleep(DELAY)
+                self._balance = new_bal
+                print(f"[{thread_id}] Balance updated to: ₦{self._balance}")
+            
+            result = TransactionResult(True, TransactionType.WITHDRAW, amount, account_id=self.account_number)
+            self.transaction_history.append(result)
+            print(f"[{thread_id}] Lock released for Account {self.account_number}\n")
+            return result
+        
+        except Exception as e:
+            result = TransactionResult(False, TransactionType.WITHDRAW, amount, str(e), self.account_number)
+            self.transaction_history.append(result)
+            print(f"[{thread_id}] Error during withdrawal: {str(e)}\n")
+            return result
+
+    def get_Balance(self) -> float:
+        with self._lock:
+            return self._balance
+
+    def transfer(self, target_account: "BankAccount", amount: float) -> TransactionResult:
+        thread_id = threading.current_thread().name
+        print(f"\n[{thread_id}] TRANSFER: Account {self.account_number} → "
+          f"Account {target_account.account_number}, ₦{amount}")
+    
+        try:
+            if self.account_number == target_account.account_number:
+                raise ValueError("Cannot transfer to same account")
+            
+            if amount <= 0:
+                raise ValueError("Transfer amount must be positive")
+    
+            # This is where deadlock is explicitly prevented by the use
+            # of lock ordering
+            if self.account_number < target_account.account_number:
+                first, second = self, target_account
+            else:
+                first, second = target_account, self
+    
+            print(f"[{thread_id}] Lock order: "
+                  f"{first.account_number} → {second.account_number}")
+    
+            # Acquire locks in consistent order
+            with first._lock:
+                print(f"[{thread_id}] Acquired lock on Account {first.account_number}")
+                time.sleep(DELAY)  # simulate context switching
+                
+                with second._lock:
+                    print(f"[{thread_id}] Acquired lock on Account {second.account_number}")
+                    if self._balance < amount:
+                        print(f"[{thread_id}] Insufficient funds")
+                        raise ValueError("Insufficient funds")
+    
+                    self._balance -= amount
+                    target_account._balance += amount
+    
+                    print(f"[{thread_id}] Source balance: ₦{self._balance}")
+                    print(f"[{thread_id}] Target balance: ₦{target_account._balance}")
+                    print(f"[{thread_id}] TRANSFER completed successfully")
+    
+                    result = TransactionResult(
+                        True,
+                        TransactionType.TRANSFER,
+                        amount,
+                        account_id=self.account_number
+                    )
+    
+                    self.transaction_history.append(result)
+                    target_account.transaction_history.append(result)
+    
+                    return result
+    
+        except Exception as e:
+            result = TransactionResult(
+                False,
+                TransactionType.TRANSFER,
+                amount,
+                str(e),
+                self.account_number
+            )
+            self.transaction_history.append(result)
+            print(f"[{thread_id}] Error during transfer: {str(e)}\n")
+            return result
+
+
+class TransactionSimulator:
+    """
+    Simulates and manages all transactions for bank accounts.
+    Tracks results, handles concurrent operations, and validates final states.
+    """
+    
+    def __init__(self, accounts: Dict[int, BankAccount]):
+        self.accounts = accounts
+        self.all_results: List[TransactionResult] = []
+        self.lock = threading.Lock()
+    
+    def deposit(self, account_id: int, amount: float) -> TransactionResult:
+        """Execute a deposit transaction"""
+        if account_id not in self.accounts:
+            result = TransactionResult(False, TransactionType.DEPOSIT, amount, 
+                                      f"Account {account_id} not found")
+            self._record_result(result)
+            return result
+        
+        result = self.accounts[account_id].Deposit(amount)
+        self._record_result(result)
+        return result
+    
+    def withdraw(self, account_id: int, amount: float) -> TransactionResult:
+        """Execute a withdrawal transaction"""
+        if account_id not in self.accounts:
+            result = TransactionResult(False, TransactionType.WITHDRAW, amount, 
+                                      f"Account {account_id} not found")
+            self._record_result(result)
+            return result
+        
+        result = self.accounts[account_id].Withdraw(amount)
+        self._record_result(result)
+        return result
+    
+    def transfer(self, source_id: int, target_id: int, amount: float) -> TransactionResult:
+        """Execute a transfer transaction"""
+        if source_id not in self.accounts:
+            result = TransactionResult(False, TransactionType.TRANSFER, amount, 
+                                      f"Source account {source_id} not found")
+            self._record_result(result)
+            return result
+        
+        if target_id not in self.accounts:
+            result = TransactionResult(False, TransactionType.TRANSFER, amount, 
+                                      f"Target account {target_id} not found")
+            self._record_result(result)
+            return result
+        
+        result = self.accounts[source_id].transfer(self.accounts[target_id], amount)
+        self._record_result(result)
+        return result
+    
+    def _record_result(self, result: TransactionResult):
+        """Thread-safe recording of transaction results"""
+        with self.lock:
+            self.all_results.append(result)
+    
+    def get_account_balance(self, account_id: int) -> float:
+        """Get current balance of an account"""
+        if account_id not in self.accounts:
+            return -1
+        return self.accounts[account_id].get_Balance()
+    
+    def get_all_balances(self) -> Dict[int, float]:
+        """Get all account balances"""
+        return {acc_id: acc.get_Balance() for acc_id, acc in self.accounts.items()}
+    
+    def get_successful_transactions(self) -> List[TransactionResult]:
+        """Get all successful transactions"""
+        return [res for res in self.all_results if res.success]
+    
+    def get_failed_transactions(self) -> List[TransactionResult]:
+        """Get all failed transactions"""
+        return [res for res in self.all_results if not res.success]
+    
+    def get_total_successful_deposits(self) -> float:
+        """Calculate total successful deposits"""
+        return sum(res.amount for res in self.all_results 
+                  if res.success and res.transaction_type == TransactionType.DEPOSIT)
+    
+    def get_total_successful_withdrawals(self) -> float:
+        """Calculate total successful withdrawals"""
+        return sum(res.amount for res in self.all_results 
+                  if res.success and res.transaction_type == TransactionType.WITHDRAW)
+    
+    def get_transaction_count(self) -> int:
+        """Get total number of transactions"""
+        return len(self.all_results)
+    
+    def print_summary(self):
+        """Print transaction summary"""
+        print("\n" + "*"*80)
+        print("TRANSACTION SIMULATOR SUMMARY")
+        print("*"*80)
+        print(f"Total Transactions: {self.get_transaction_count()}")
+        print(f"Successful: {len(self.get_successful_transactions())}")
+        print(f"Failed: {len(self.get_failed_transactions())}")
+        print(f"\nTotal Deposits: ₦{self.get_total_successful_deposits()}")
+        print(f"Total Withdrawals: ₦{self.get_total_successful_withdrawals()}")
+        print("\nFinal Balances:")
+        for acc_id, balance in self.get_all_balances().items():
+            print(f"  Account {acc_id}: ₦{balance}")
+        print("="*80 + "\n")
+
+
+
+class TestBankAccountBasicOperations(unittest.TestCase):
+    """Test basic bank account operations"""
+    
+    def test_deposit_single_thread(self):
+        """Test single deposit operation"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100)})
+        result = simulator.deposit(1, 50)
+        
+        self.assertTrue(result.success)
+        self.assertEqual(simulator.get_account_balance(1), 150)
+        self.assertEqual(result.transaction_type, TransactionType.DEPOSIT)
+    
+    def test_withdraw_single_thread(self):
+        """Test single withdrawal operation"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100)})
+        result = simulator.withdraw(1, 30)
+        
+        self.assertTrue(result.success)
+        self.assertEqual(simulator.get_account_balance(1), 70)
+        self.assertEqual(result.transaction_type, TransactionType.WITHDRAW)
+    
+    def test_transfer_single_thread(self):
+        """Test single transfer operation"""
+        simulator = TransactionSimulator({
+            1: BankAccount(1, 100),
+            2: BankAccount(2, 50)
+        })
+        result = simulator.transfer(1, 2, 30)
+        
+        self.assertTrue(result.success)
+        self.assertEqual(simulator.get_account_balance(1), 70)
+        self.assertEqual(simulator.get_account_balance(2), 80)
+    
+    def test_deposit_negative_amount(self):
+        """Test deposit with negative amount"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100)})
+        result = simulator.deposit(1, -50)
+        
+        self.assertFalse(result.success)
+        self.assertEqual(simulator.get_account_balance(1), 100)
+    
+    def test_withdraw_negative_amount(self):
+        """Test withdrawal with negative amount"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100)})
+        result = simulator.withdraw(1, -30)
+        
+        self.assertFalse(result.success)
+        self.assertEqual(simulator.get_account_balance(1), 100)
+    
+    def test_withdraw_insufficient_funds(self):
+        """Test withdrawal with insufficient funds"""
+        simulator = TransactionSimulator({1: BankAccount(1, 50)})
+        result = simulator.withdraw(1, 100)
+        
+        self.assertFalse(result.success)
+        self.assertEqual(simulator.get_account_balance(1), 50)
+    
+    def test_transfer_insufficient_funds(self):
+        """Test transfer with insufficient funds"""
+        simulator = TransactionSimulator({
+            1: BankAccount(1, 50),
+            2: BankAccount(2, 100)
+        })
+        result = simulator.transfer(1, 2, 100)
+        
+        self.assertFalse(result.success)
+        self.assertEqual(simulator.get_account_balance(1), 50)
+        self.assertEqual(simulator.get_account_balance(2), 100)
+    
+    def test_transfer_same_account(self):
+        """Test transfer to same account"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100)})
+        result = simulator.transfer(1, 1, 50)
+        
+        self.assertFalse(result.success)
+        self.assertEqual(simulator.get_account_balance(1), 100)
+    
+    def test_transfer_nonexistent_source(self):
+        """Test transfer from non-existent account"""
+        simulator = TransactionSimulator({2: BankAccount(2, 100)})
+        result = simulator.transfer(1, 2, 50)
+        
+        self.assertFalse(result.success)
+    
+    def test_transfer_nonexistent_target(self):
+        """Test transfer to non-existent account"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100)})
+        result = simulator.transfer(1, 2, 50)
+        
+        self.assertFalse(result.success)
+    
+    def test_deposit_zero_amount(self):
+        """Test deposit with zero amount"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100)})
+        result = simulator.deposit(1, 0)
+        
+        self.assertFalse(result.success)
+        self.assertEqual(simulator.get_account_balance(1), 100)
+    
+    def test_multiple_sequential_deposits(self):
+        """Test multiple sequential deposits"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100)})
+        
+        results = []
+        for i in range(5):
+            results.append(simulator.deposit(1, 20))
+        
+        for result in results:
+            self.assertTrue(result.success)
+        
+        self.assertEqual(simulator.get_account_balance(1), 200)
+    
+    def test_multiple_sequential_withdrawals(self):
+        """Test multiple sequential withdrawals"""
+        simulator = TransactionSimulator({1: BankAccount(1, 200)})
+        
+        results = []
+        for i in range(5):
+            results.append(simulator.withdraw(1, 20))
+        
+        for result in results:
+            self.assertTrue(result.success)
+        
+        self.assertEqual(simulator.get_account_balance(1), 100)
+
+
+class TestBankAccountConcurrency(unittest.TestCase):
+    """Test concurrent operations"""
+    
+    def test_concurrent_deposits_same_account(self):
+        """Test concurrent deposits to same account"""
+        simulator = TransactionSimulator({1: BankAccount(1, 0)})
+        
+        def deposit_worker(amount):
+            simulator.deposit(1, amount)
+        
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(deposit_worker, 10) for _ in range(10)]
+            for f in futures:
+                f.result()
+        
+        # Should be exactly 100 becasue of the use of locks
+        self.assertEqual(simulator.get_account_balance(1), 100)
+    
+    def test_concurrent_withdrawals_same_account(self):
+        """Test concurrent withdrawals from same account"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100)})
+        
+        def withdraw_worker(amount):
+            simulator.withdraw(1, amount)
+        
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(withdraw_worker, 5) for _ in range(10)]
+            for f in futures:
+                f.result()
+        
+        # Should be exactly 50 due to locks
+        self.assertEqual(simulator.get_account_balance(1), 50)
+    
+    def test_concurrent_mixed_operations_single_account(self):
+        """Test mixed deposit and withdrawal operations"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100)})
+        
+        def deposit_worker():
+            for _ in range(5):
+                simulator.deposit(1, 10)
+        
+        def withdraw_worker():
+            for _ in range(5):
+                simulator.withdraw(1, 5)
+        
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            f1 = executor.submit(deposit_worker)
+            f2 = executor.submit(withdraw_worker)
+            f1.result()
+            f2.result()
+        
+        # Should be 100 + 50 - 25 = 125
+        self.assertEqual(simulator.get_account_balance(1), 125)
+    
+ 
+    def test_concurrent_deposits_different_accounts(self):
+        """Test concurrent deposits to different accounts"""
+        simulator = TransactionSimulator({
+            1: BankAccount(1, 0),
+            2: BankAccount(2, 0),
+            3: BankAccount(3, 0)
+        })
+        
+        def deposit_to_account(acc_id, amount, count):
+            for _ in range(count):
+                simulator.deposit(acc_id, amount)
+        
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = [
+                executor.submit(deposit_to_account, 1, 10, 10),
+                executor.submit(deposit_to_account, 2, 20, 10),
+                executor.submit(deposit_to_account, 3, 30, 10)
+            ]
+            for f in futures:
+                f.result()
+        
+        self.assertEqual(simulator.get_account_balance(1), 100)
+        self.assertEqual(simulator.get_account_balance(2), 200)
+        self.assertEqual(simulator.get_account_balance(3), 300)
+        
+    
+    def test_concurrent_transfers(self):
+        """Test concurrent transfers between accounts"""
+        simulator = TransactionSimulator({
+            1: BankAccount(1, 100),
+            2: BankAccount(2, 100)
+        })
+        
+        def transfer_worker(source, target, amount, count):
+            for _ in range(count):
+                simulator.transfer(source, target, amount)
+        
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            f1 = executor.submit(transfer_worker, 1, 2, 5, 5)
+            f2 = executor.submit(transfer_worker, 2, 1, 3, 5)
+            f1.result()
+            f2.result()
+        
+        # Account 1: 100 - 25 + 15 = 90
+        # Account 2: 100 + 25 - 15 = 110
+        self.assertEqual(simulator.get_account_balance(1), 90)
+        self.assertEqual(simulator.get_account_balance(2), 110)
+    
+
+class TestRaceCondition(unittest.TestCase):
+    """Test race condition demonstration"""
+    
+    def test_race_condition(self):
+        """Test race condition without locking"""
+        print("\n" + "="*80)
+        print("TEST: RACE CONDITION (no locking)")
+        print("="*80)
+        
+        class UnsafeBankAccount:
+            def __init__(self, account_number: int, balance: float = 0.0):
+                self.account_number = account_number
+                self._balance = balance
+            
+            def deposit(self, amount: float) -> None:
+                thread_id = threading.current_thread().name
+                print(f"[{thread_id}] DEPOSIT ₦{amount} to Account {self.account_number}")
+                print(f"[{thread_id}] Read balance: ₦{self._balance}")
+                
+                new_balance = self._balance + amount
+                print(f"[{thread_id}] Calculated new balance: ₦{new_balance}")
+                
+                time.sleep(DELAY)  # Simulate delay - creates race window
+                
+                print(f"[{thread_id}] Writing balance: ₦{new_balance}")
+                self._balance = new_balance
+                print(f"[{thread_id}] Done. Current balance: ₦{self._balance}\n")
+            
+            def get_balance(self):
+                return self._balance
+        
+        account = UnsafeBankAccount(1, 0)
+        
+        print(f"Initial balance: ₦{account.get_balance()}")
+        print("Starting 10 threads, each depositing ₦10")
+        print("Expected final balance: ₦100\n")
+        
+        def make_deposit():
+            account.deposit(10)
+        
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(make_deposit) for _ in range(10)]
+            for f in futures:
+                f.result()
+        
+        final = account.get_balance()
+        print("="*80)
+        print("RACE CONDITION RESULT:")
+        print("Expected:  ₦100")
+        print(f"Actual:   ₦{final}")
+        print(f"Lost:     ₦{100 - final}")
+        print("="*80 + "\n")
+        
+        # This will likely fail due to race condition
+        self.assertLess(final, 100, f"Race condition should occur! Got ₦{final}")
+
+
+class TestDeadlockDetection(unittest.TestCase):
+    """Test deadlock scenarios"""
+    
+    def test_guaranteed_deadlock(self):
+        """Test guaranteed deadlock with barrier synchronization"""
+        global transfer_barrier
+        transfer_barrier = threading.Barrier(2)
+        
+        print("\n" + "="*80)
+        print("TEST: GUARANTEED DEADLOCK (using barrier synchronization)")
+        print("="*80)
+        
+        accounts = {
+            1: BankAccount(1, 100),
+            2: BankAccount(2, 100)
+        }
+        
+        acc1 = accounts[1]
+        acc2 = accounts[2]
+        
+        print(f"Initial: Account 1: ₦{acc1.get_Balance()}, Account 2: ₦{acc2.get_Balance()}\n")
+
+        def a_to_b():
+            thread_id = threading.current_thread().name
+            print(f"[{thread_id}] Thread A→B starting\n")
+            
+            print(f"[{thread_id}] Step 1: Acquiring lock on Account 1")
+            acc1._lock.acquire()
+            print(f"[{thread_id}] Lock acquired on Account 1")
+            
+            print(f"[{thread_id}] Waiting at barrier for Thread B to acquire its lock...")
+            transfer_barrier.wait(timeout=1) # wait for other thread to also lock its account
+            print(f"[{thread_id}] Both threads have their first locks!")
+            
+            print(f"[{thread_id}] Step 2: Attempting to acquire lock on Account 2")
+            print(f"[{thread_id}] BLOCKED! Thread B holds Account 2's lock")
+            print(f"[{thread_id}] DEADLOCK: Waiting forever...\n")
+            
+            acc2._lock.acquire()
+            print(f"[{thread_id}] This line will NEVER be reached")
+            acc2._lock.release()
+            acc1._lock.release()
+
+        def b_to_a():
+            thread_id = threading.current_thread().name
+            print(f"[{thread_id}] Thread B→A starting\n")
+            
+            print(f"[{thread_id}] Step 1: Acquiring lock on Account 2")
+            acc2._lock.acquire()
+            print(f"[{thread_id}] Lock acquired on Account 2")
+            
+            print(f"[{thread_id}] Waiting at barrier for Thread A to acquire its lock...")
+            transfer_barrier.wait(timeout=1)
+            print(f"[{thread_id}] Both threads have their first locks!")
+            
+            time.sleep(DELAY)
+            
+            print(f"[{thread_id}] Step 2: Attempting to acquire lock on Account 1")
+            print(f"[{thread_id}] BLOCKED! Thread A holds Account 1's lock")
+            print(f"[{thread_id}] DEADLOCK: Waiting forever...\n")
+            
+            acc1._lock.acquire()
+            print(f"[{thread_id}] This line will NEVER be reached")
+            acc1._lock.release()
+            acc2._lock.release()
+
+        print("*"*50)
+        print("DEADLOCK SEQUENCE:")
+        print("1. Thread A locks Account 1")
+        print("2. Thread B locks Account 2")
+        print("3. Both threads wait at barrier")
+        print("4. Thread A tries to lock Account 2 (BLOCKED - B has it)")
+        print("5. Thread B tries to lock Account 1 (BLOCKED - A has it)")
+        print("6. DEADLOCK! Both wait forever")
+        print("*"*50 + "\n")
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            f1 = executor.submit(a_to_b)
+            f2 = executor.submit(b_to_a)
+            
+            try:
+                print("Waiting up to 5 seconds for threads to complete...")
+                f1.result(timeout=5)
+                f2.result(timeout=5)
+                print("\nNo deadlock occurred (this shouldn't happen!)")
+            except TimeoutError:
+                print("\n" + "*"*50)
+                print("DEADLOCK DETECTED!")
+                print("*"*50)
+                print("Thread A: Holds lock on Account 1, waiting for Account 2")
+                print("Thread B: Holds lock on Account 2, waiting for Account 1")
+                print("\nCircular Wait Dependency:")
+                print("   Thread A → Account 2 → Thread B → Account 1 → Thread A")
+                print("\nThe programme is stuck forever. This is a classic deadlock!")
+                print("*"*0 + "\n")
+
+
+
+class TestSimulatorStatistics(unittest.TestCase):
+    """Test transaction simulator statistics"""
+    
+    def test_transaction_counting(self):
+        """Test transaction counting"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100)})
+        
+        simulator.deposit(1, 50)
+        simulator.deposit(1, 30)
+        simulator.withdraw(1, 20)
+        
+        self.assertEqual(simulator.get_transaction_count(), 3)
+        self.assertEqual(len(simulator.get_successful_transactions()), 3)
+        self.assertEqual(len(simulator.get_failed_transactions()), 0)
+    
+    def test_failed_transaction_tracking(self):
+        """Test failed transaction tracking"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100)})
+        
+        simulator.deposit(1, 50)
+        simulator.withdraw(1, 200)  # This should fail since 200 is above the balance, which is 100+50 = 150
+        simulator.deposit(1, 30)
+        
+        self.assertEqual(simulator.get_transaction_count(), 3)
+        self.assertEqual(len(simulator.get_successful_transactions()), 2)
+        self.assertEqual(len(simulator.get_failed_transactions()), 1)
+    
+    def test_deposit_withdrawal_totals(self):
+        """Test deposit and withdrawal totals"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100)})
+        
+        simulator.deposit(1, 50)
+        simulator.deposit(1, 30)
+        simulator.withdraw(1, 20)
+        simulator.withdraw(1, 10)
+        
+        self.assertEqual(simulator.get_total_successful_deposits(), 80)
+        self.assertEqual(simulator.get_total_successful_withdrawals(), 30)
+    
+    def test_get_all_balances(self):
+        """Test getting all balances"""
+        simulator = TransactionSimulator({
+            1: BankAccount(1, 100),
+            2: BankAccount(2, 200),
+            3: BankAccount(3, 300)
+        })
+        
+        balances = simulator.get_all_balances()
+        
+        self.assertEqual(len(balances), 3)
+        self.assertEqual(balances[1], 100)
+        self.assertEqual(balances[2], 200)
+        self.assertEqual(balances[3], 300)
+
+
+class TestEdgeCases(unittest.TestCase):
+    """Test edge cases and corner scenarios"""
+    
+    def test_very_large_amount(self):
+        """Test with very large amounts"""
+        simulator = TransactionSimulator({1: BankAccount(1, 1_000_000)})
+        result = simulator.deposit(1, 999_999_999)
+        
+        self.assertTrue(result.success)
+        self.assertEqual(simulator.get_account_balance(1), 1_000_999_999)
+    
+    def test_very_small_amount(self):
+        """Test with very small amounts"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100.99)})
+        result = simulator.withdraw(1, 0.01)
+        
+        self.assertTrue(result.success)
+        self.assertAlmostEqual(simulator.get_account_balance(1), 100.98, places=2)
+    
+    def test_float_precision(self):
+        """Test floating point precision"""
+        simulator = TransactionSimulator({1: BankAccount(1, 0)})
+        
+        simulator.deposit(1, 0.1)
+        simulator.deposit(1, 0.2)
+        simulator.deposit(1, 0.3)
+        
+        # Should be 0.6, but floating point may cause issues, hence the use of 
+        # assertAlmostEqual with atlease 5 dp
+        balance = simulator.get_account_balance(1)
+        self.assertAlmostEqual(balance, 0.6, places=5)
+    
+    def test_empty_transaction_list(self):
+        """Test with no transactions"""
+        simulator = TransactionSimulator({1: BankAccount(1, 100)})
+        
+        self.assertEqual(simulator.get_transaction_count(), 0)
+        self.assertEqual(len(simulator.get_successful_transactions()), 0)
+        self.assertEqual(len(simulator.get_failed_transactions()), 0)
+    
+    def test_stress_test_many_accounts(self):
+        """Test with many accounts"""
+        accounts = {i: BankAccount(i, 100) for i in range(100)}
+        simulator = TransactionSimulator(accounts)
+        
+        for acc_id in range(100):
+            simulator.deposit(acc_id, 50)
+        
+        for acc_id in range(100):
+            self.assertEqual(simulator.get_account_balance(acc_id), 150)
+    
+    def test_stress_test_many_transactions(self):
+        """Test with many transactions"""
+        simulator = TransactionSimulator({1: BankAccount(1, 10000)})
+        
+        for _ in range(1000):
+            simulator.withdraw(1, 1)
+        
+        self.assertEqual(simulator.get_account_balance(1), 9000)
+        self.assertEqual(simulator.get_transaction_count(), 1000)
+    
+    def test_concurrent_stress_test(self):
+        """Stress test with concurrent operations"""
+        simulator = TransactionSimulator({
+            1: BankAccount(1, 5000),
+            2: BankAccount(2, 5000),
+            3: BankAccount(3, 5000)
+        })
+        
+        def worker(account_id):
+            for _ in range(50):
+                simulator.deposit(account_id, 1)
+                simulator.withdraw(account_id, 0.5)
+        
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(worker, id ) for id in range(10)]
+            for f in futures:
+                f.result()
+        
+        # Verify all transactions were recorded
+        self.assertEqual(simulator.get_transaction_count(), 1000)
+
+class TableTestResult(unittest.TextTestResult):
+    """
+    Custom TestResult that collects results and prints them in table format.
+    """
+    def __init__(self, stream, descriptions, verbosity):
+        super().__init__(stream, descriptions, verbosity)
+        self.test_results = []
+
+    def addSuccess(self, test):
+        super().addSuccess(test)
+        self.test_results.append((self.getDescription(test), "PASS"))
+
+    def addFailure(self, test, err):
+        super().addFailure(test, err)
+        self.test_results.append((self.getDescription(test), "FAIL"))
+
+    def addError(self, test, err):
+        super().addError(test, err)
+        self.test_results.append((self.getDescription(test), "ERROR"))
+
+    def print_table(self):
+        print("\n" + "=" * 80)
+        print("TEST RESULTS SUMMARY")
+        print("=" * 80)
+        print(f"{'Test Name':60} | Result")
+        print("-" * 80)
+        for name, result in self.test_results:
+            print(f"{name:60} | {result}")
+        print("=" * 80 + "\n")
+        
+def run_all_tests():
+  
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+
+    # Uncomment all test classes you want to run
+    # NOTE THAT TestRaceCondition and TestDeadlockDetection are blocking and should be tested exclusively
+    suite.addTests(loader.loadTestsFromTestCase(TestBankAccountBasicOperations))
+    suite.addTests(loader.loadTestsFromTestCase(TestBankAccountConcurrency))
+    #suite.addTests(loader.loadTestsFromTestCase(TestRaceCondition))
+    #suite.addTests(loader.loadTestsFromTestCase(TestDeadlockDetection))
+    suite.addTests(loader.loadTestsFromTestCase(TestSimulatorStatistics))
+    suite.addTests(loader.loadTestsFromTestCase(TestEdgeCases))
+
+    runner = unittest.TextTestRunner(
+        verbosity=0,
+        resultclass=TableTestResult
+    )
+
+    result = runner.run(suite)
+
+    # ✅ Print table summary
+    result.print_table()
+
+    return result.wasSuccessful()
+
+
+if __name__ == "__main__":
+
+    success = run_all_tests()
+
+
+</code></pre>
+
+											
+										
+									</section>									
+									
+								</div>
+							</div>
+					</section>					
+					<ul class="actions">
+						<li><a href="elements.html" class="button">Back</a></li>
+					</ul>
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

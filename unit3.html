@@ -1,0 +1,175 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Mfon Owoh</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">Mfon Owoh</a></h1>
+						<nav>
+							<a href="#menu">Menu</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menu</h2>
+							<ul class="links">
+								<li><a href="index.html">Home</a></li>
+								<li><a href="generic.html">Generic</a></li>
+								<li><a href="elements.html">Elements</a></li>
+								<!--<li><a href="#">Log In</a></li> -->
+								<!--<li><a href="#">Sign Up</a></li> -->
+							</ul>
+							<a href="#" class="close">Close</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>Unit 3: Design Patterns I - Creational Patterns</h2>
+								<p> <b>Focus on Five Key Creational Design Patterns:<br></b>
+								<b>Singleton:</b> Ensures a class has only one instance and provides a global point of access to it.<br>
+								<b>Factory Method:</b> Defines an interface for creating objects but let's subclasses alter the type of objects created.<br>
+								<b>Builder:</b> Separates the construction of a complex object from its representation.<br>
+								<b>Prototype:</b> Allows cloning of objects without making the code dependent on their classes.<br>
+								<b>Abstract Factory:</b> Provides an interface for creating families of related or dependent objects.</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<section>
+										<h3 class="major">Objectives</h3>										
+										<p> <li>Understand and explain what design patterns are and why they are important in software development.
+											<li>Identify and apply key creational design patterns, including Singleton, Factory Method, Builder, Prototype, and Abstract Factory.</li>
+											<li> Recognise how creational patterns are used in real-world software systems to improve flexibility and maintainability.</li>
+											<li>Implement the Factory Method pattern in a practical coding exercise</li></p>
+										
+										<h4><p>Task</p>
+You are tasked with designing a system for a car manufacturing company that produces different types of cars (e.g., Sedan, SUV, Hatchback).<br> 
+Using the Factory Method Pattern, implement a solution that allows the company to create cars without specifying the exact class of the car in the main program.</h4>
+	  
+										<blockquote><p><b>Solution Steps</b></p>
+<p>A Car interface or abstract class with a method drive().
+Concrete car classes (Sedan, SUV, Hatchback) that implement the Car interface.
+A CarFactory abstract class with a factory method create_car().
+Concrete factory classes (SedanFactory, SUVFactory, HatchbackFactory) that override the create_car() method.
+A demonstration of how the factory method pattern is used to create and drive different types of cars..</blockquote>
+										<h4>Solution</h4>
+										<pre><code>
+from abc import ABC, abstractmethod
+
+"""
+Topic: Design(Creational) Pattern - Factory Methods
+"""
+class Car(ABC):
+    @abstractmethod
+    def drive(self) -> None:
+        pass
+
+class SUV(Car):
+    def drive(self) -> None:
+        print("Driving an SUV...") 
+
+class Sedan (Car):
+    def drive(self) -> None:
+        print("Driving a Sedan...")
+
+class Hatchback(Car):
+    def drive(self) -> None:
+        print("Driving a Hatchback...")
+
+''' Car factory '''
+class CarFactory(ABC):
+    @abstractmethod
+    def CreateCar(self)-> Car:
+        pass
+class SuvFactory(CarFactory):
+    def CreateCar(self)-> Car:
+        return SUV()
+class SedanFactory(CarFactory):
+    def CreateCar(self)-> Car:
+        return Sedan()
+class HatchbackFactory(CarFactory):
+    def CreateCar(self)-> Car:
+        return Hatchback()
+
+'''
+Client side:
+'''
+class Client:
+    def __init__ (self) -> None:
+        self.factories = [SuvFactory(),SedanFactory(),HatchbackFactory()]
+    
+    def go(self):
+        for factory in self.factories:
+            car = factory.CreateCar()
+            car.drive()
+
+if __name__ == "__main__":
+    
+    client = Client()
+    client.go()
+
+''' Alternative:
+
+    factory = SuvFactory()
+    car = factory.CreateCar()
+    car.drive()
+
+    factory = SedanFactory()
+    car = factory.CreateCar()
+    car.drive()
+
+    factory = HatchbackFactory()
+    car = factory.CreateCar()
+    car.drive()
+'''
+    
+
+
+</code></pre>
+
+											
+										
+									</section>									
+									
+								</div>
+							</div>
+					</section>	
+					<ul class="actions">
+						<li><a href="elements.html" class="button">Back</a></li>
+					</ul>					
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Mfon Owoh</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">Mfon Owoh</a></h1>
+						<nav>
+							<a href="#menu">Menu</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menu</h2>
+							<ul class="links">
+								<li><a href="index.html">Home</a></li>
+								<li><a href="generic.html">Generic</a></li>
+								<li><a href="elements.html">Elements</a></li>
+								<!--<li><a href="#">Log In</a></li> -->
+								<!--<li><a href="#">Sign Up</a></li> -->
+							</ul>
+							<a href="#" class="close">Close</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>Unit 2: SOLID Principles of Object-Oriented Design</h2>
+								<p> Unit 2 is about the SOLID principles, a set of five design principles that are essential for writing clean, maintainable, and scalable object-oriented code. 
+								These principles help design software systems that are easier to understand, extend, and modify.</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<section>
+										<h3 class="major">Objectives</h3>										
+										<p> <li>Understand and explain  each of the five SOLID principles and their importance in object-oriented design</li>
+											<li>Apply the SOLID principles to refactor code, making it more maintainable and scalable</li>
+											<li>Recognise how SOLID principles are used in real-world systems to improve software design.></li></p>
+										
+										<h4>Problems with the Initial Code:
+The Order class handles cart management, total calculation, and payment processing (SRP violation).
+Adding a new payment method requires modifying the Order class (OCP violation).
+Tight coupling between Order and payment methods (DIP violation).
+Class Order:
+<code><pre>
+def __init__(self):
+    self.items = []
+
+def add_item(self, item):
+   self.items.append(item)
+
+def calculate_total(self):
+   return sum(item.price for item in self.items)
+
+def pay(self, payment_type):
+   if payment_type == "credit":
+      print("Processing credit card payment...")
+   elif payment_type == "paypal":
+      print("Processing PayPal payment...") #Adding a new method requires modifying this class.</pre></code></h4>
+	  
+										<blockquote><p><b>Refactored Code Steps (SOLID Principles)</b></p>
+<p>Single Responsibility Principle (SRP):</p>
+Problem: Order does too much.<br>
+Solution: Split into:<br>
+Order: Manages items and calculates totals.<br>
+<p>PaymentProcessor: Handles payments.</p>
+Improvement: Order no longer handles payments.<br>
+<p>Open/Closed Principle (OCP):</p>
+Problem: Adding a new payment method requires modifying PaymentProcessor.<br>
+Solution: Use abstraction (e.g., an interface or abstract class).<br>
+<p>Liskov Substitution Principle (LSP):</p>
+Problem: Subclasses should replace their parent class without breaking functionality.<br>
+Solution: Ensure all PaymentMethod subclasses implement pay() correctly.<br>
+Improvement: CryptoPayment can replace PaymentMethod without issues.<br>
+<p>Interface Segregation Principle (ISP):</p>
+Problem: If PaymentMethod had unrelated methods, subclasses would be forced to implement them.<br>
+Solution: Keep interfaces small and focused.<br>
+Improvement: Classes only implement what they need.<br>
+<p>Dependency Inversion Principle (DIP):</p>
+Problem: High-level Order depends on low-level PaymentProcessor.<br>
+Solution: Depend on abstractions (PaymentMethod).<br>
+Improvement: Order depends on PaymentMethod (abstraction), not concrete classes.</blockquote>
+										<h4>Solution</h4>
+										<pre><code>
+from abc import ABC, abstractmethod
+
+class PaymentMethod(ABC):
+    @abstractmethod
+    def name(self):
+        pass
+class CreditCardPayment(PaymentMethod):
+     def name (self) ->str:
+        return "Credit card"
+        
+class PaypalPayment(PaymentMethod):
+    def name (self) ->str:
+        return "Paypal"
+
+class CryptoPayment(PaymentMethod):
+     def name (self) ->str:
+        return "Crypto"
+    
+     def fun2(self):
+        return "fun2"
+
+
+class PaymentProcessor:   
+    def __init__(self, method: PaymentMethod) -> None:
+        self.__pay_method = method.name()
+
+    def pay(self):
+        print(f"Processing {self.__pay_method} payment...")
+    
+    """
+    TODO: Add other logics for processing payment
+    """
+
+class Order:
+    def __init__(self, selected_payment: PaymentProcessor) -> None:
+        self.items = []
+        self.selected_payment = selected_payment 
+
+    def add_item(self, item):
+        self.items.append(item)
+
+    def remove_item(self, item):
+        for it in self.items:
+            if it == item:
+                self.items.remove(it)
+
+    def calculate_total(self) -> float:
+        return sum(item.price for item in self.items)
+
+    def finish_order(self) -> bool:
+        '''
+        TODO:  Add logic to calculate amount to pay at checkout
+        '''
+        if (self.selected_payment != None):
+            self.selected_payment.pay()
+            return True
+        else: return False
+
+
+# 1. select payment method
+selected_payment_method = PaypalPayment()
+# 2. payment processor depends on payment method
+payment_processor = PaymentProcessor(selected_payment_method)
+# 3. Oder class depends on Payment processor 
+order = Order(payment_processor)
+order.finish_order()
+
+</code></pre>
+
+											
+										
+									</section>									
+									
+								</div>
+							</div>
+					</section>	
+					<ul class="actions">
+						<li><a href="elements.html" class="button">Back</a></li>
+					</ul>					
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

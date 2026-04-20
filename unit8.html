@@ -1,0 +1,248 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Mfon Owoh</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">Mfon Owoh</a></h1>
+						<nav>
+							<a href="#menu">Menu</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menu</h2>
+							<ul class="links">
+								<li><a href="index.html">Home</a></li>
+								<li><a href="generic.html">Generic</a></li>
+								<li><a href="elements.html">Elements</a></li>
+								<!--<li><a href="#">Log In</a></li> -->
+								<!--<li><a href="#">Sign Up</a></li> -->
+							</ul>
+							<a href="#" class="close">Close</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>Unit 8: Refactoring and Code Smells</h2>
+								<p> <b>The module provided an Introduction to Code Smells:<br></b>								
+								</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<section>
+										<h3 class="major">Objectives</h3>										
+										<p> <li>Understand and explain what code smells are and how to detect them in a codebase.</li>
+											<li>Apply refactoring techniques to improve code maintainability and readability.</li>
+											<li>Refactor an existing codebase to eliminate code smells, using object-oriented principles.</li>
+											<li>Recognise the importance of refactoring in maintaining high-quality, sustainable software systems.</li></p>
+										
+										<h4><p>Task</p>
+A monolithic code containing vulnerablities like use of magic numbers, no input validation, does not follow OOP, mixes responsiblity 
+
+<pre><code>
+# Non-OOP version
+
+employees = []
+
+def add_employee(name, hourly_rate, hours_worked):
+    employee = {
+        "name": name,
+        "hourly_rate": hourly_rate,
+        "hours_worked": hours_worked
+    }
+    employees.append(employee)
+
+def calculate_pay(employee):
+	if employee["hours_worked"] < 40:
+		return None
+    return employee["hourly_rate"] * employee["hours_worked"]
+
+def print_payslip(employee):
+    pay = calculate_pay(employee)
+    print(f"Employee: {employee['name']}")
+    print(f"Hours Worked: {employee['hours_worked']}")
+    print(f"Hourly Rate: {employee['hourly_rate']}")
+    print(f"Gross Pay: {pay}")
+
+add_employee("Alice", 25, 40)
+add_employee("Bob", 30, 35)
+
+for employee in employees:
+    print_payslip(employee)
+		
+		</pre></code>
+</h4>
+	  
+										<blockquote><p><b>Solution Steps</b></p>
+<p>
+<li>1. Converted procedural code into object-oriented design<br>
+The original version used:<br>
+•	a global employees list<br>
+•	dictionary-based employee records<br>
+•	standalone functions such as add_employee(), calculate_pay(), and print_payslip()<br>
+This was refactored into classes:<br>
+•	Employee<br>
+•	PayrollSystem<br>
+This grouped related data and behavior together.<br>
+2. Replaced dictionaries with class instances<br>
+Instead of storing employee data in dictionaries, each employee became an Employee object with:<br>
+•	name<br>
+•	hourly_rate<br>
+•	hours_worked<br>
+This improved encapsulation and made the code easier to understand.<br>
+3. Moved behavior into methods<br>
+The original standalone functions were moved into class methods:<br>
+•	calculate_pay() became Employee.calculate_pay()<br>
+•	print_payslip() became Employee.print_payslip()<br>
+•	employee collection management moved into PayrollSystem.add_employee()<br>
+This made responsibilities clearer.<br>
+4. Introduced overtime logic<br>
+The OOP version was extended to support overtime pay calculation:<br>
+•	standard hours were treated differently from overtime hours<br>
+•	overtime pay used a multiplier<br>
+This added more realistic payroll behavior.<br>
+5. Introduced magic numbers for demonstration<br>
+In the intermediate OOP version, hard-coded values were added:<br>
+•	40 for standard working hours<br>
+•	1.5 for overtime multiplier<br>
+These were included intentionally to demonstrate the problem of magic numbers.<br>
+6. Refactored magic numbers into named constants<br>
+The hard-coded values were then replaced with named class constants:<br>
+•	STANDARD_HOURS<br>
+•	OVERTIME_MULTIPLIER<br>
+This improved readability and made business rules easier to change.<br>
+7. Added input validation<br>
+Validation was added to prevent invalid data from entering the system.<br>
+For Employee:<br>
+•	name must be a non-empty string<br>
+•	hourly_rate must be a non-negative number<br>
+•	hours_worked must be a non-negative number<br>
+For PayrollSystem:<br>
+•	only Employee objects can be added<br>
+This made the code safer and more robust.<br>
+8. Added code comments<br>
+Comments were added to explain:<br>
+•	validation logic<br>
+•	overtime calculation<br>
+•	class responsibilities<br>
+•	payroll processing flow</blockquote>
+										<h4>Solution</h4>
+										<pre><code>
+# Refactored OOP version with input validation and code comments
+
+class Employee:
+    STANDARD_HOURS = 40
+    OVERTIME_MULTIPLIER = 1.5
+
+    def __init__(self, name, hourly_rate, hours_worked):
+        # Validate employee name
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError("name must be a non-empty string")
+
+        # Validate hourly rate
+        if not isinstance(hourly_rate, (int, float)) or hourly_rate < 0:
+            raise ValueError("hourly_rate must be a non-negative number")
+
+        # Validate hours worked
+        if not isinstance(hours_worked, (int, float)) or hours_worked < 0:
+            raise ValueError("hours_worked must be a non-negative number")
+
+        self.name = name
+        self.hourly_rate = hourly_rate
+        self.hours_worked = hours_worked
+
+    def calculate_pay(self):
+        # Apply overtime rule when standard hours are exceeded
+        if self.hours_worked > self.STANDARD_HOURS:
+            overtime_hours = self.hours_worked - self.STANDARD_HOURS
+            regular_hours = self.STANDARD_HOURS
+            return (
+                regular_hours * self.hourly_rate
+                + overtime_hours * self.hourly_rate * self.OVERTIME_MULTIPLIER
+            )
+
+        # Standard pay calculation
+        return self.hourly_rate * self.hours_worked
+
+    def print_payslip(self):
+        # Display employee payroll details
+        print(f"Employee: {self.name}")
+        print(f"Hours Worked: {self.hours_worked}")
+        print(f"Hourly Rate: {self.hourly_rate}")
+        print(f"Gross Pay: {self.calculate_pay()}")
+
+
+class PayrollSystem:
+    def __init__(self):
+        # Store all employees managed by the payroll system
+        self.employees = []
+
+    def add_employee(self, employee):
+        # Ensure only Employee objects are added
+        if not isinstance(employee, Employee):
+            raise TypeError("employee must be an instance of Employee")
+
+        self.employees.append(employee)
+
+    def print_all_payslips(self):
+        # Print payslips for every employee in the system
+        for employee in self.employees:
+            employee.print_payslip()
+
+
+# Example usage
+payroll = PayrollSystem()
+payroll.add_employee(Employee("Alice", 25, 45))
+payroll.add_employee(Employee("Bob", 30, 35))
+payroll.print_all_payslips()
+
+</code></pre>
+
+											
+										
+									</section>									
+									
+								</div>
+							</div>
+					</section>	
+						<ul class="actions">
+						  <li><a href="elements.html" class="button">Back</a></li>
+						</ul>					
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

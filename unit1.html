@@ -1,0 +1,269 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Mfon Owoh</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">Mfon Owoh</a></h1>
+						<nav>
+							<a href="#menu">Menu</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menu</h2>
+							<ul class="links">
+								<li><a href="index.html">Home</a></li>
+								<li><a href="generic.html">Generic</a></li>
+								<li><a href="elements.html">Elements</a></li>
+								<!--<li><a href="#">Log In</a></li> -->
+								<!--<li><a href="#">Sign Up</a></li> -->
+							</ul>
+							<a href="#" class="close">Close</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>Unit 1: Introduction and Recap of Object-Oriented Programming (OOP)</h2>
+								<p>In the first unit of the Advanced OOP course focus was on basic OOP principles such as polymorphism and inheritance.</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<section>
+										<h3 class="major">Objectives</h3>										
+										<p> <li>Understand and explain the four key OOP concepts: Inheritance, Polymorphism, Abstraction, and  Encapsulation</li>
+										<li>Describe the role of classes, objects, constructors, destructors, and access control in OOP</li>
+										<li>	Apply OOP principles to design basic class hierarchies in Python or Java</li>
+										<li>	Recognise the importance of OOP in large-scale and secure software design</li></p>
+										
+										<h4>Task 1: Basic Class Hierarchy (Inheritance)</h4>
+										<blockquote> Inheritance in OOP depicts a parent (basee class) offprings (dreived classes)relationship.<br>
+										The following steps are taken to showcase this concept in task 1: <br> 
+										<li>Define a base class Vehicle with brand and fuel_type as instance attributes (use __init__).</li>
+<li>Create a subclass Car that inherits from Vehicle and adds num_doors as an additional attribute.</li>
+<li>Ensure the Car class calls the parent class's __init__ method (using super() in Python)</li>.</blockquote>
+										<h4>Solution</h4>
+										<pre><code>
+class Vehicle:
+    def __init__(self, brand: str, fuel_type: str, year: int, color: str) -> None:
+        self.brand = brand
+        self.fuel_type = fuel_type
+        self.year = year
+        self.color = color
+    def drive(self) -> None:
+        print(f"Driving {self.brand} {self.fuel_type} {self.year} {self.color}")
+
+class Car(Vehicle):
+    def __init__(self, brand: str, fuel_type: str, year: int, color: str, num_doors: int) -> None:
+        super().__init__(brand, fuel_type, year, color)
+        self.num_doors = num_doors
+
+    def drive(self) -> None:
+        print(f"Driving {self.brand} {self.fuel_type} {self.year} {self.color} with {self.num_doors} doors")
+
+car = Car("Toyota", "Gasoline", 2024, "Red", 4)
+car.drive()
+
+# Extras
+class Motorcycle(Vehicle):
+    def __init__(self, brand: str, fuel_type: str, year: int, color: str, engine_size: int) -> None:
+        super().__init__(brand, fuel_type, year, color)
+        self.engine_size = engine_size
+
+    def drive(self) -> None:
+        print(f"Driving {self.brand} {self.fuel_type} {self.year} {self.color} with a {self.engine_size} engine")
+
+motorcycle = Motorcycle("Honda", "Gasoline", 2024, "Blue", 1000)
+motorcycle.drive()
+</code></pre>
+
+										<h4>Task 2: Polymorphism with Methods</h4>
+										<blockquote>Define an abstract Shape class with an abstract method area() (use ABC and abstractmethod in Python).
+Create Circle and Rectangle subclasses that inherit from Shape.
+Implement area() in each subclass (for Circle, use πr²; for Rectangle, use length * width).</blockquote>
+										<h4>Solution</h4>
+										<pre><code>from abc import ABC, abstractmethod
+import math
+class Shape(ABC):
+    @abstractmethod
+    def area(self) -> float:
+        pass
+
+class Circle(Shape):
+    def __init__(self, radius: float) -> None:
+        self.radius = radius
+
+    def area(self) -> float:
+        return math.pi * self.radius ** 2
+
+class Rectangle(Shape):
+    def __init__(self, length: float, width: float) -> None:
+        self.length = length
+        self.width = width
+
+    def area(self) -> float:
+        return self.length * self.width
+
+circle  = Circle(3.7);
+print(f"Area of circle: {circle.area()}")
+</code></pre>
+
+<h4>Task 3: Encapsulation with Access Control</h4>
+										<blockquote>Define BankAccount with a private attribute __balance (use double underscore in Python).
+Provide public methods:
+deposit(amount) to add to __balance.
+withdraw(amount) to deduct from __balance (check for sufficient funds).
+Use getter methods if balance access is needed (e.g., get_balance())..</blockquote>
+										<h4>Solution</h4>
+										<pre><code>
+class BankAccount:
+    def __init__(self, initial_balance: float = 0.0) -> None:
+        self.__balance = initial_balance
+
+    def deposit(self, amount: float) -> None:
+        if amount > 0:
+            self.__balance += amount
+        else:
+            raise ValueError("Amount must be positive")
+
+    def withdraw(self, amount: float) -> None:
+        if self.__balance >= amount:
+            self.__balance -= amount
+        else:
+            raise ValueError("Insufficient funds")
+
+    def get_balance(self) -> float:
+        return self.__balance
+
+
+</code></pre>
+
+<h4>Task 4: Abstraction with Base Class</h4>
+										<blockquote>Create an abstract Animal class with an abstract method make_sound().
+Implement subclasses Dog and Cat, each overriding make_sound() to return "Woof!" and "Meow!" respectively.
+Use ABC and abstractmethod decorators in Python.</blockquote>
+							           <h4>Solution</h4>
+										<pre><code>from abc import ABC, abstractmethod
+
+class Animal(ABC):
+    @abstractmethod
+    def make_sound(self) -> str:
+        pass
+
+class Cat(Animal):
+    def make_sound(self) -> str:
+        return "Meow!"
+
+class Dog(Animal):
+    def make_sound(self) -> str:
+        return "Woof!"
+class Bird(Animal):
+    def make_sound(self) -> str:
+        return "Tweet!"
+class Fish(Animal):
+    def make_sound(self) -> str:
+        return "Blub!"
+class Snake(Animal):
+    def make_sound(self) -> str:
+        return "Hiss!"
+class Horse(Animal):
+    def make_sound(self) -> str:
+        return "Neigh!"
+class Pig(Animal):
+    def make_sound(self) -> str:
+        return "Oink!"
+
+</code></pre>
+
+<h4>Task 5: Constructor and Destructor</h4>
+										<blockquote>Define a Person class with __init__(self, name) to set the name attribute.
+Add a destructor __del__(self) that prints a farewell message (e.g., "Goodbye, {name}!").
+Test by creating and deleting an instance (use del explicitly or let it go out of scope).</blockquote>
+							           <h4>Solution</h4>
+										<pre><code>
+
+class Person:
+    def __init__(self, first_name:str, last_name:str) -> None:
+        self.first_name = first_name
+        self.last_name = last_name
+
+    def __del__(self) -> None:
+        print(f"Goodbye, {self.first_name} {self.last_name}!")
+
+
+</code></pre>
+
+<h4>Task 6: Class Methods and Static Methods</h4>
+										<blockquote>Define a Car class with a class method create_car(brand, model) that returns a new Car instance.
+Add a static method calculate_mileage(distance, fuel_used) to calculate mileage (distance / fuel_used).
+Test by creating a car instance and using both class and static methods.</blockquote>
+							           <h4>Solution</h4>
+										<pre><code>
+  
+class Car:
+    def __init__(self, brand: str, model: str) -> None:
+        self.brand = brand
+        self.model = model
+
+    @classmethod
+    def create_car(cls, brand: str, model: str) -> "Car":
+        return cls(brand, model)
+
+    @staticmethod
+    def calculate_mileage(distance: float, fuel_used: float) -> float:
+        return distance / fuel_used
+
+car = Car.create_car("Toyota", "Corolla")
+print(f"Car brand: {car.brand}, Car model: {car.model}")
+print(f"Mileage: {Car.calculate_mileage(100, 10)}")
+
+</code></pre>
+
+
+									
+										
+									</section>									
+									
+								</div>
+							</div>
+					</section>	
+					<ul class="actions">
+						<li><a href="elements.html" class="button">Back</a></li>
+					</ul>					
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

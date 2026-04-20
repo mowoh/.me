@@ -1,0 +1,150 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Mfon Owoh</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">Mfon Owoh</a></h1>
+						<nav>
+							<a href="#menu">Menu</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menu</h2>
+							<ul class="links">
+								<li><a href="index.html">Home</a></li>
+								<li><a href="generic.html">Generic</a></li>
+								<li><a href="elements.html">Elements</a></li>
+								<!--<li><a href="#">Log In</a></li> -->
+								<!--<li><a href="#">Sign Up</a></li> -->
+							</ul>
+							<a href="#" class="close">Close</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>Unit 5: Design Patterns III - Behavioural Patterns</h2>
+								<p> <b>This Unit provides an Introduction to Six Key Behavioural Design Patterns:<br></b>
+								<b>Strategy:</b> Allows you to define a family of algorithms, encapsulate each one, and make them interchangeable.<br>
+								<b>Observer:</b> Defines a one-to-many dependency between objects so that when one object changes state, all its dependents are notified.<br>
+								<b>Chain of Responsibility:</b> Passes a request along a chain of handlers, where each handler either processes the request or passes it to the next handler.<br>
+								<b>Template Method:</b> Defines the skeleton of an algorithm in a method, deferring some steps to subclasses.<br>
+								<b>Command:</b> Encapsulates a request as an object, allowing you to parameterise clients with different requests.<br>
+								<b>State:</b> Allows an object to alter its behaviour when its internal state changes.
+								
+								<b>Required reading: Nesteruk, D. (2022) Design patterns in modern C++20 : reusable approaches for object-oriented software design. Second edition. California: Apress, Pt I, II, III</b>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<section>
+										<h3 class="major">Objectives</h3>										
+										<p> <li>Understand and explain what design patterns are and why they are important in software development.
+											<li>Identify and apply key creational design patterns, including Singleton, Factory Method, Builder, Prototype, and Abstract Factory.</li>
+											<li> Recognise how creational patterns are used in real-world software systems to improve flexibility and maintainability.</li>
+											<li>Implement the Factory Method pattern in a practical coding exercise</li></p>
+										
+										<h4><p>Task</p>
+You will implement the Strategy pattern in a project, giving you hands-on experience with applying behavioural patterns.</h4>
+	  
+										<blockquote><p><b>Solution Steps</b>
+										<li>Define a Strategy interface with a method for processing payments (e.g., process_payment)</li>.
+
+										<li>Create concrete strategies for each payment method (e.g., CreditCardStrategy, PayPalStrategy, CryptoStrategy).</li>
+
+										<li>Define a Context class that uses a strategy to process payments.</li>
+
+										<li>Allow the client to dynamically switch between payment strategies at runtime.</li>
+										
+										</p></blockquote>
+										<h4>Solution</h4>
+										<pre><code>
+										
+from abc import ABC, abstractmethod
+
+# Strategy Interface
+class PaymentStrategy(ABC):
+    @abstractmethod
+    def process_payment(self, amount):
+        pass
+
+# Concrete Strategies
+class CreditCardStrategy(PaymentStrategy):
+    def process_payment(self, amount):
+        return f"Processing ${amount} via Credit Card"
+
+class PayPalStrategy(PaymentStrategy):
+    def process_payment(self, amount):
+        return f"Processing ${amount} via PayPal"
+
+class CryptoStrategy(PaymentStrategy):
+    def process_payment(self, amount):
+        return f"Processing ${amount} via Cryptocurrency"
+
+# Context
+class PaymentProcessor:
+    def __init__(self, strategy: PaymentStrategy):
+        self.strategy = strategy
+
+    def set_strategy(self, strategy: PaymentStrategy):
+        self.strategy = strategy
+
+    def execute_payment(self, amount):
+        return self.strategy.process_payment(amount)
+
+# Client Code
+processor = PaymentProcessor(CreditCardStrategy())
+print(processor.execute_payment(100))  # Output: Processing $100 via Credit Card
+
+processor.set_strategy(PayPalStrategy())
+print(processor.execute_payment(50))   # Output: Processing $50 via PayPal
+
+
+</code></pre>
+
+											
+										
+									</section>									
+									
+								</div>
+							</div>
+					</section>					
+					<ul class="actions">
+						<li><a href="elements.html" class="button">Back</a></li>
+					</ul>
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>

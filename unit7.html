@@ -1,0 +1,125 @@
+<!DOCTYPE HTML>
+<!--
+	Solid State by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Mfon Owoh</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Page Wrapper -->
+			<div id="page-wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<h1><a href="index.html">Mfon Owoh</a></h1>
+						<nav>
+							<a href="#menu">Menu</a>
+						</nav>
+					</header>
+
+				<!-- Menu -->
+					<nav id="menu">
+						<div class="inner">
+							<h2>Menu</h2>
+							<ul class="links">
+								<li><a href="index.html">Home</a></li>
+								<li><a href="generic.html">Generic</a></li>
+								<li><a href="elements.html">Elements</a></li>
+								<!--<li><a href="#">Log In</a></li> -->
+								<!--<li><a href="#">Sign Up</a></li> -->
+							</ul>
+							<a href="#" class="close">Close</a>
+						</div>
+					</nav>
+
+				<!-- Wrapper -->
+					<section id="wrapper">
+						<header>
+							<div class="inner">
+								<h2>Unit 7: Secure Coding Practices in Object-Oriented Programming</h2>
+								<p> <b>Explore Common Vulnerabilities in OO Systems:<br></b>
+								<li>Covered key techniques for writing secure code, including input validation, proper authentication, and exception handling</li>
+								</p>
+							</div>
+						</header>
+
+						<!-- Content -->
+							<div class="wrapper">
+								<div class="inner">
+
+									<section>
+										<h3 class="major">Objectives</h3>										
+										<p> <li>Understand and explain the importance of secure coding in software development</li>
+										<li>Identify common vulnerabilities in object-oriented systems, such as injection attacks and buffer overflows.</li>
+										<li>Apply secure coding techniques, including input validation, proper authentication, and exception handling.</li>
+										<li>Refactor a codebase to eliminate security vulnerabilities through a practical exercise</li></p>
+										
+										<h4><p>Task</p>
+A legacy codebase has multiple security vulnerabilities, including SQL injection, improper error handling, and weak authentication
+<pre><code>
+# Vulnerable code
+def login(username, password):
+    query = f"SELECT * FROM users WHERE username='{username}' AND password='{password}'"
+    result = execute_query(query)
+    if result:
+        return "Login successful"
+    else:
+        return "Invalid credentials"
+		
+		</pre></code>
+</h4>
+	  
+										<blockquote><p><b>Solution Steps</b></p>
+<p>
+<li>Analyse the codebase for common vulnerabilities (e.g., SQL injection, improper error handling).
+<li>Implement input validation and sanitisation</li>
+<li>Replace weak authentication mechanisms with secure ones</li>
+<li>Improve exception handling to avoid exposing sensitive information</li>
+<li>Encapsulate sensitive data and methods</li>
+<li>Test the refactored codebase to ensure vulnerabilities are eliminated</li></blockquote>
+										<h4>Solution</h4>
+										<pre><code>
+# Secure code
+import bcrypt
+
+def login(username, password):
+    query = "SELECT * FROM users WHERE username=?"
+    user = execute_query(query, (username,))
+    if user and bcrypt.checkpw(password.encode(), user['password'].encode()):
+        return "Login successful"
+    else:
+        return "Invalid credentials"
+'''   
+
+</code></pre>
+
+											
+										
+									</section>									
+									
+								</div>
+							</div>
+					</section>					
+					<ul class="actions">
+					<li><a href="elements.html" class="button">Back</a></li>
+					</ul>
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
