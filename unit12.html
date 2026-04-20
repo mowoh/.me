@@ -43,9 +43,9 @@
 					<section id="wrapper">
 						<header>
 							<div class="inner">
-								<h2>Unit 7: Secure Coding Practices in Object-Oriented Programming</h2>
-								<p> <b>Explore Common Vulnerabilities in OO Systems:<br></b>
-								<li>Covered key techniques for writing secure code, including input validation, proper authentication, and exception handling</li>
+								<h2>Unit 12: Capstone Project</h2>
+								<p> <b>Apply the principles learnt in previous units to design a modular, safe and secure solution targeting cybersecurity:<br></b>
+								<li>Covers secure coding, modular software architecture, OOP, design patterns, test driven development and UI with WPF</li>
 								</p>
 							</div>
 						</header>
@@ -56,49 +56,39 @@
 
 									<section>
 										<h3 class="major">Objectives</h3>										
-										<p> <li>Understand and explain the importance of secure coding in software development</li>
-										<li>Identify common vulnerabilities in object-oriented systems, such as injection attacks and buffer overflows.</li>
-										<li>Apply secure coding techniques, including input validation, proper authentication, and exception handling.</li>
-										<li>Refactor a codebase to eliminate security vulnerabilities through a practical exercise</li></p>
+										<p> <li>Design and implement a complex software system using advanced object-oriented design principles, design patterns, and secure coding practices.</li>
+											<li>Apply knowledge to solve real-world problems in cybersecurity.</li>										
+											 </p>
 										
 										<h4><p>Task</p>
-A legacy codebase has multiple security vulnerabilities, including SQL injection, improper error handling, and weak authentication
-<pre><code>
-# Vulnerable code
-def login(username, password):
-    query = f"SELECT * FROM users WHERE username='{username}' AND password='{password}'"
-    result = execute_query(query)
-    if result:
-        return "Login successful"
-    else:
-        return "Invalid credentials"
-		
-		</pre></code>
-</h4>
+						Design of the Secure Banking App 
+						</h4>
 	  
 										<blockquote><p><b>Solution Steps</b></p>
-<p>
-<li>Analyse the codebase for common vulnerabilities (e.g., SQL injection, improper error handling).
-<li>Implement input validation and sanitisation</li>
-<li>Replace weak authentication mechanisms with secure ones</li>
-<li>Improve exception handling to avoid exposing sensitive information</li>
-<li>Encapsulate sensitive data and methods</li>
-<li>Test the refactored codebase to ensure vulnerabilities are eliminated</li></blockquote>
-										<h4>Solution</h4>
-										<pre><code>
-# Secure code
-import bcrypt
+						<p>
+						<li>provide a simple banking UI using .Net WPF,
+						<li>support multiple account types such as current accounts, savings accounts, etc.</li>
+						<li>persist account data with SQLlite</li>
+						<li>support secure transactions and storage via the use of encryption</li>
+						<li>encapsulate account behavior behind interfaces<l/i>
+						<li>promote mocking and testability of the Accounts classes via the use of sufficient interfaces</li>
+						<li>allow future extensibility through factories and abstractions</li>
+						<li>employment of the test-driven development approach</li>
+						<li>ensure thread safety using locks </li>
+						</li></blockquote>
+																<h4>Solution</h4>
+ 
+	<style>
+        body { margin: 0; }
+        iframe {
+            width: 100%;
+            height: 100vh; /* Full viewport height */
+            border: none;
+        }
+    </style>
 
-def login(username, password):
-    query = "SELECT * FROM users WHERE username=?"
-    user = execute_query(query, (username,))
-    if user and bcrypt.checkpw(password.encode(), user['password'].encode()):
-        return "Login successful"
-    else:
-        return "Invalid credentials"
-'''   
-
-</code></pre>
+		
+		<iframe src="files/capstone_proj_report.pdf" title="PDF Viewer"></iframe>
 
 											
 										
